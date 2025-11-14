@@ -1,0 +1,85 @@
+package com.example.neuralfit.auth.service;
+
+import com.example.neuralfit.auth.dto.LoginRequest;
+import com.example.neuralfit.auth.dto.LoginResponse;
+import com.example.neuralfit.auth.dto.PatientSignUpRequest;
+import com.example.neuralfit.auth.dto.TherapistSignUpRequest;
+import com.example.neuralfit.common.entity.AppUser;
+import com.example.neuralfit.common.entity.Patient;
+import com.example.neuralfit.common.entity.Therapist;
+import com.example.neuralfit.common.repository.AppUserRepository;
+import com.example.neuralfit.common.repository.PatientRepository;
+import com.example.neuralfit.common.repository.TherapistRepository;
+import com.example.neuralfit.common.security.JwtUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class AuthService {
+    private final AppUserRepository appUserRepository;
+    private final PatientRepository patientRepository;
+    private final TherapistRepository therapistRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest loginRequest) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+        );
+
+        return LoginResponse.builder()
+                .accessToken(jwtUtil.generateAccessToken(auth))
+                .refreshToken(jwtUtil.generateRefreshToken(auth))
+                .build();
+    }
+
+    @Transactional
+    public void patientSignUp(PatientSignUpRequest signUpRequest) {
+        appUserRepository.findByEmail(signUpRequest.getEmail())
+                .ifPresent(appUser -> {
+                    throw new IllegalArgumentException("중복되는 이메일입니다");
+                });
+
+        AppUser appUser = appUserRepository.save(AppUser.builder()
+                .email(signUpRequest.getEmail())
+                .userRole(signUpRequest.getUserRole())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                .build()
+        );
+
+        patientRepository.save(Patient.builder()
+                .appUser(appUser)
+                .birthdate(signUpRequest.getBirthDate())
+                .gender(signUpRequest.getGender())
+                .build());
+    }
+
+    @Transactional
+    public void therapistSignUp(TherapistSignUpRequest signUpRequest) {
+        appUserRepository.findByEmail(signUpRequest.getEmail())
+                .ifPresent(appUser -> {
+                    throw new IllegalArgumentException("중복되는 이메일입니다");
+                });
+
+        AppUser appUser = appUserRepository.save(AppUser.builder()
+                .email(signUpRequest.getEmail())
+                .userRole(signUpRequest.getUserRole())
+                .password(passwordEncoder.encode(signUpRequest.getPassword()))
+                .build()
+        );
+
+        therapistRepository.save(Therapist.builder()
+                .appUser(appUser)
+                .organization(signUpRequest.getOrganization())
+                .therapistType(signUpRequest.getTherapistType())
+                .build());
+    }
+}
