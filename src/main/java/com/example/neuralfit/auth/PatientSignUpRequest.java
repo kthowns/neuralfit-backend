@@ -30,7 +30,7 @@ public class PatientSignUpRequest {
     @NotNull(message="역할을 입력해주세요")
     private UserRole userRole;
     @NotNull(message="생년월일을 입력해주세요")
-    private LocalDate BirthDate;
+    private LocalDate birthDate;
     @NotNull(message="성별을 입력해주세요")
     private Gender gender;
 }
