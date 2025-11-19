@@ -5,6 +5,7 @@ import com.example.neuralfit.common.entity.AppUser;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -19,12 +20,12 @@ public class AppUserInfoDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public AppUserInfoDto fromEntity(AppUser appUser) {
+    public static AppUserInfoDto fromEntity(AppUser appUser) {
         return AppUserInfoDto.builder()
                 .id(appUser.getId())
                 .email(appUser.getEmail())
                 .name(appUser.getName())
-                .userRole(userRole)
+                .userRole(appUser.getUserRole())
                 .createdAt(appUser.getCreatedAt())
                 .updatedAt(appUser.getUpdatedAt())
                 .build();
