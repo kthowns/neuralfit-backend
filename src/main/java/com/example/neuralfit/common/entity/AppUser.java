@@ -40,6 +40,10 @@ public class AppUser implements UserDetails {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "user_role")
+    @Enumerated(EnumType.STRING)
+    private UserRole userRole;
+
     @Column(name = "created_at")
     @CreatedDate
     private LocalDateTime createdAt;
@@ -47,10 +51,6 @@ public class AppUser implements UserDetails {
     @Column(name = "updated_at")
     @LastModifiedDate
     private LocalDateTime updatedAt;
-
-    @Column(name = "user_role")
-    @Enumerated(EnumType.STRING)
-    private UserRole userRole;
 
     @Override
     public String getUsername() {
